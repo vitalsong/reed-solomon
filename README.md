@@ -34,7 +34,7 @@ auto decoded = rs.decode(encoded);
 assert(decoded.size() == msg_len);
 
 //data is equal
-assert(std::strncmp((char*)message.data(), (char*)decoded.data(), msg_len) == 0);
+assert(std::memcmp((char*)message.data(), (char*)decoded.data(), msg_len) == 0);
 ```
 
 ### Build
