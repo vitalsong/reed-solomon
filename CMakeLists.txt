@@ -18,10 +18,6 @@ add_library(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE src/rslib)
 target_include_directories(${PROJECT_NAME} PUBLIC include)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wno-sign-compare)
-endif()
-
 if (REED_SOLOMON_ASAN_ENABLED)
     include(cmake/sanitizer.cmake)
     enable_address_sanitizer(TARGET ${PROJECT_NAME})

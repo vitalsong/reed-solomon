@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <stdexcept>
+#include <cstring>
 
 namespace {
 

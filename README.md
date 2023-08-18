@@ -1,5 +1,9 @@
 ### C++ Reed-Solomon (based on Linux kernel implementation)
 
+![testing](https://github.com/vitalsong/reed-solomon/actions/workflows/android-ndk.yml/badge.svg)
+![testing](https://github.com/vitalsong/reed-solomon/actions/workflows/linux.yml/badge.svg)
+![testing](https://github.com/vitalsong/reed-solomon/actions/workflows/windows.yml/badge.svg)
+
 > For more detailed customization, you can use the original `rslib`
 
 ### Example
