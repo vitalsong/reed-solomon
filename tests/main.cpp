@@ -1,6 +1,6 @@
-#include <string.h>
-#include <assert.h>
-#include <stdint.h>
+#include <cassert>
+#include <cstdint>
+#include <cstring>
 
 #include <gtest/gtest.h>
 #include <reed-solomon.h>
