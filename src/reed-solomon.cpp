@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <cstring>
+#include <map>
 
 namespace {
 
@@ -22,9 +23,46 @@ const uint16_t PRIM_POLY[9] = {
   0x187   ///< 2^8
 };
 
+struct RsParamKey
+{
+    explicit RsParamKey(uint8_t msg, uint8_t ecc, uint8_t nbit)
+    {
+        _hash = (uint32_t(msg) << 16) | (uint32_t(ecc) << 8) | nbit;
+    }
+
+    bool operator<(const RsParamKey& rhs) const noexcept
+    {
+        return _hash < rhs._hash;
+    }
+
+    bool operator==(const RsParamKey& rhs) const noexcept
+    {
+        return _hash == rhs._hash;
+    }
+
+private:
+    uint32_t _hash{0};
+};
+
+std::shared_ptr<rs_control> _get_rs(uint8_t msg_len, uint8_t ecc_len, uint8_t bit_len)
+{
+    thread_local std::map<RsParamKey, std::weak_ptr<rs_control>> cache;
+    const RsParamKey key{msg_len, ecc_len, bit_len};
+    if (cache.count(key) == 0 || cache.at(key).expired()) {
+        auto ptr = init_rs(bit_len, PRIM_POLY[bit_len], 0, 1, ecc_len);
+        if (ptr == nullptr) {
+            throw std::runtime_error("Init reed solomon structure error");
+        }
+        auto rs = std::shared_ptr<rs_control>(ptr, free_rs);
+        cache[key] = std::weak_ptr<rs_control>(rs);
+        return rs;
+    }
+    return cache[key].lock();
+}
+
 }   // namespace
 
-ReedSolomon::ReedSolomon(int msg, int ecc, int bitlen)
+ReedSolomon::ReedSolomon(uint8_t msg, uint8_t ecc, uint8_t bitlen)
   : msg_(msg)
   , ecc_(ecc)
   , nbit_(bitlen)
@@ -37,15 +75,7 @@ ReedSolomon::ReedSolomon(int msg, int ecc, int bitlen)
         throw std::runtime_error("block size cannot be greater than 2^nbit-1");
     }
 
-    rs_ = init_rs(nbit_, PRIM_POLY[nbit_], 0, 1, ecc_);
-    if (rs_ == nullptr) {
-        throw std::runtime_error("Init reed solomon structure error");
-    }
-}
-
-ReedSolomon::~ReedSolomon()
-{
-    free_rs(rs_);
+    rs_ = _get_rs(msg, ecc, bitlen);
 }
 
 std::vector<uint8_t> ReedSolomon::encode(const std::vector<uint8_t>& message)
@@ -57,7 +87,7 @@ std::vector<uint8_t> ReedSolomon::encode(const std::vector<uint8_t>& message)
     std::vector<uint16_t> par(ecc_);
     std::vector<uint8_t> enc(msg_ + ecc_);
     std::memcpy(enc.data(), message.data(), msg_);
-    encode_rs8(rs_, enc.data(), msg_, par.data(), 0);
+    encode_rs8(rs_.get(), enc.data(), msg_, par.data(), 0);
     for (int i = 0; i < ecc_; i++) {
         enc[i + msg_] = par[i];
     }
@@ -83,7 +113,7 @@ std::vector<uint8_t> ReedSolomon::decode(const std::vector<uint8_t>& block, cons
     std::vector<int> eras(erasures.begin(), erasures.end());
     std::memcpy(dec.data(), block.data(), msg_);
     std::vector<uint16_t> corr(msg_ + ecc_);
-    int nerr = decode_rs8(rs_, dec.data(), par.data(), msg_, nullptr, eras.size(), eras.data(), 0, nullptr);
+    int nerr = decode_rs8(rs_.get(), dec.data(), par.data(), msg_, nullptr, eras.size(), eras.data(), 0, nullptr);
     if (nerr < 0) {
         nerr = msg_;
     }

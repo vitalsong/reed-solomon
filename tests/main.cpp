@@ -21,7 +21,8 @@ TEST_P(ReedSolomonTest, BaseDecoder)
     const int ecc = (max_block / 4) + 1;
     const int msg = max_block - ecc;
 
-    auto rs = ReedSolomon(msg, ecc, nbit);
+    //move test
+    ReedSolomon rs{ReedSolomon(msg, ecc, nbit)};
 
     std::vector<uint8_t> message(msg);
     for (int i = 0; i < msg; ++i) {

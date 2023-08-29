@@ -2,14 +2,23 @@
 
 #include <vector>
 #include <cstdint>
+#include <memory>
 
 struct rs_control;
 
 class ReedSolomon
 {
 public:
-    explicit ReedSolomon(int msg, int ecc, int bitlen = 8);
-    ~ReedSolomon();
+    explicit ReedSolomon(uint8_t msg, uint8_t ecc, uint8_t bitlen = 8);
+
+    ReedSolomon(ReedSolomon&& rhs)
+      : msg_{rhs.msg_}
+      , ecc_{rhs.ecc_}
+      , nbit_{rhs.nbit_}
+      , rs_{rhs.rs_}
+    {}
+
+    ReedSolomon(const ReedSolomon&) = delete;
 
     std::vector<uint8_t> encode(const std::vector<uint8_t>& message);
 
@@ -33,8 +42,8 @@ public:
     }
 
 private:
-    int msg_;
-    int ecc_;
-    int nbit_;
-    rs_control* rs_{nullptr};
+    uint8_t msg_;
+    uint8_t ecc_;
+    uint8_t nbit_;
+    std::shared_ptr<rs_control> rs_;
 };
