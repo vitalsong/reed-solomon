@@ -39,10 +39,10 @@ TEST_P(ReedSolomonTest, BaseDecoder)
             pos = rand() % encoded.size();
         }
         erasures.insert(pos);
-        encoded[pos] &= rand() % (1 << nbit);
+        encoded[pos] ^= rand() % (1 << nbit);
     }
 
-    auto decoded = rs.decode(encoded);
+    auto [decoded, rs_err] = rs.decode(encoded);
     ASSERT_EQ(decoded.size(), msg);
 
     ASSERT_EQ(std::memcmp(message.data(), decoded.data(), msg), 0);
@@ -73,10 +73,10 @@ TEST_P(ReedSolomonTest, ErasuresDecoder)
             pos = rand() % encoded.size();
         }
         erasures.insert(pos);
-        encoded[pos] = 0;
+        encoded[pos] ^= rand() % (1 << nbit);
     }
 
-    auto decoded = rs.decode(encoded, std::vector<uint8_t>(erasures.begin(), erasures.end()));
+    auto [decoded, rs_err] = rs.decode(encoded, std::vector<uint8_t>(erasures.begin(), erasures.end()));
     ASSERT_EQ(decoded.size(), msg);
 
     ASSERT_EQ(std::memcmp(message.data(), decoded.data(), msg), 0);

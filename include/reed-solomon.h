@@ -22,9 +22,11 @@ public:
 
     std::vector<uint8_t> encode(const std::vector<uint8_t>& message);
 
-    std::vector<uint8_t> decode(const std::vector<uint8_t>& block);
+    //[decoded message, number of corrected symbols]
+    std::pair<std::vector<uint8_t>, int> decode(const std::vector<uint8_t>& block);
 
-    std::vector<uint8_t> decode(const std::vector<uint8_t>& block, const std::vector<uint8_t>& erasures);
+    std::pair<std::vector<uint8_t>, int> decode(const std::vector<uint8_t>& block,
+                                                const std::vector<uint8_t>& erasures);
 
     int msg_len() const noexcept
     {

@@ -94,14 +94,15 @@ std::vector<uint8_t> ReedSolomon::encode(const std::vector<uint8_t>& message)
     return enc;
 }
 
-std::vector<uint8_t> ReedSolomon::decode(const std::vector<uint8_t>& block, const std::vector<uint8_t>& erasures)
+std::pair<std::vector<uint8_t>, int> ReedSolomon::decode(const std::vector<uint8_t>& block,
+                                                         const std::vector<uint8_t>& erasures)
 {
     if (block.size() != (msg_ + ecc_)) {
         throw std::runtime_error("not valid block size for decode");
     }
 
     if (erasures.size() > ecc_) {
-        return std::vector<uint8_t>(block.begin(), block.begin() + msg_);
+        return decode(block);
     }
 
     std::vector<uint16_t> par(ecc_);
@@ -118,10 +119,10 @@ std::vector<uint8_t> ReedSolomon::decode(const std::vector<uint8_t>& block, cons
         nerr = msg_;
     }
 
-    return dec;
+    return std::make_pair(dec, nerr);
 }
 
-std::vector<uint8_t> ReedSolomon::decode(const std::vector<uint8_t>& block)
+std::pair<std::vector<uint8_t>, int> ReedSolomon::decode(const std::vector<uint8_t>& block)
 {
     return decode(block, {});
 }
