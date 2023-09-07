@@ -39,7 +39,7 @@ TEST_P(ReedSolomonTest, BaseDecoder)
             pos = rand() % encoded.size();
         }
         erasures.insert(pos);
-        encoded[pos] ^= rand() % (1 << nbit);
+        encoded[pos] = 0;
     }
 
     auto [decoded, rs_err] = rs.decode(encoded);
@@ -66,14 +66,13 @@ TEST_P(ReedSolomonTest, ErasuresDecoder)
     ASSERT_EQ(encoded.size(), msg + ecc);
 
     std::set<uint8_t> erasures;
-    //guaranteed to fix n located errors
+    //guaranteed to fix ecc located errors
     for (int i = 0, pos = 0; i < ecc; i++) {
-        //erase only msg symbols, not ecc
-        while (erasures.count(pos) != 0 && (pos >= msg)) {
+        while (erasures.count(pos) != 0) {
             pos = rand() % encoded.size();
         }
         erasures.insert(pos);
-        encoded[pos] ^= rand() % (1 << nbit);
+        encoded[pos] = 0;
     }
 
     auto [decoded, rs_err] = rs.decode(encoded, std::vector<uint8_t>(erasures.begin(), erasures.end()));

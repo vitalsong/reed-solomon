@@ -28,7 +28,7 @@ for (int i=0; i < rs.ecc_len()/2; ++i) {
 }
 
 //decoder
-auto decoded = rs.decode(encoded);
+auto [decoded, rs_err] = rs.decode(encoded);
 // if you know the erasures positions a priori, you can recover ecc_len symbols
 // auto decoded = rs.decode(encoded, erasures);
 assert(decoded.size() == msg_len);
