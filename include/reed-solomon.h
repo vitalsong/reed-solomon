@@ -23,6 +23,7 @@ public:
     std::vector<uint8_t> encode(const std::vector<uint8_t>& message);
 
     //[decoded message, number of corrected symbols]
+    //if num of corrected symbols greater than ecc/2, then the message was not corrected
     std::pair<std::vector<uint8_t>, int> decode(const std::vector<uint8_t>& block);
 
     std::pair<std::vector<uint8_t>, int> decode(const std::vector<uint8_t>& block,

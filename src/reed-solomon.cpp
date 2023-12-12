@@ -116,7 +116,7 @@ std::pair<std::vector<uint8_t>, int> ReedSolomon::decode(const std::vector<uint8
     std::vector<uint16_t> corr(msg_ + ecc_);
     int nerr = decode_rs8(rs_.get(), dec.data(), par.data(), msg_, nullptr, eras.size(), eras.data(), 0, nullptr);
     if (nerr < 0) {
-        nerr = msg_;
+        nerr = (msg_ + ecc_);   ///< all symbols are wrong
     }
 
     return std::make_pair(dec, nerr);
